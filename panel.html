@@ -1,0 +1,82 @@
+<script>
+var fondoActual = null;
+var capas = {
+    'protegidas': null,
+    'municipios': null,
+    'corredor': null,
+    'stepping': null
+};
+var seleccionado = null;
+
+var geojsonData = {
+    'protegidas': __PROTEGIDAS_JSON__,
+    'municipios': __MUNICIPIOS_JSON__,
+    'corredor': __CORREDOR_JSON__,
+    'stepping': __STEPPING_JSON__ || null
+};
+
+function baseStyle() {
+    return { color: 'green', weight: 0.8, fillOpacity: 0.4 };
+}
+function highlightStyle() {
+    return { color: '#ffc300', weight: 0.8, fillOpacity: 0.4 };
+}
+
+function cambiarFondo(opcion) {
+    if (fondoActual) {
+        map.removeLayer(fondoActual);
+    }
+    const fondos = {
+        osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
+        positron: L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'),
+        dark: L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png'),
+        satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}')
+    };
+    fondoActual = fondos[opcion] || fondos.osm;
+    fondoActual.addTo(map);
+}
+
+function mostrarCapa(nombre) {
+    if (!geojsonData[nombre]) return;
+
+    if (capas[nombre]) {
+        map.removeLayer(capas[nombre]);
+        capas[nombre] = null;
+        return;
+    }
+
+    capas[nombre] = L.geoJson(geojsonData[nombre], {
+        style: baseStyle,
+        onEachFeature: function (feature, layer) {
+            let popupContent = "";
+
+            if (nombre === 'protegidas' && feature.properties?.Nombre) {
+                popupContent += "<strong>" + feature.properties.Nombre + "</strong><br>";
+            }
+            if (nombre === 'municipios' && feature.properties?.MUNICIPIO) {
+                popupContent += "<strong>" + feature.properties.MUNICIPIO + "</strong><br>";
+            }
+            if ((nombre === 'corredor' || nombre === 'stepping') && feature.properties?.corredor) {
+                popupContent += "<strong>" + feature.properties.corredor + "</strong><br>";
+            }
+
+            if (feature.properties?.actividade) {
+                const actividades = feature.properties.actividade.split('/');
+                popupContent += "<ul>";
+                actividades.forEach(a => {
+                    popupContent += "<li>" + a.trim() + "</li>";
+                });
+                popupContent += "</ul>";
+            }
+
+            layer.bindPopup("<div style='padding:5px; font-size:14px; font-family:Segoe UI'>" + popupContent + "</div>");
+
+            layer.on('click', function () {
+                if (seleccionado) seleccionado.setStyle(baseStyle());
+                layer.setStyle(highlightStyle());
+                seleccionado = layer;
+            });
+        }
+    }).addTo(map);
+}
+</script>

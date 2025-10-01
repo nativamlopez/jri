@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+    }
+
+    /* Panel selector de fondo */
+    #selector-fondo {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1001;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    #opciones-fondo {
+      display: none;
+      background-color: white;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #opciones-fondo.visible { display: block !important; }
+    #opciones-fondo div {
+      padding: 8px;
+      cursor: pointer;
+    }
+    #opciones-fondo div:hover { background-color: #eee; }
+
+    /* Panel de control */
+    /* Panel de control */
+    #panel-control {
+      position: fixed;
+      bottom: 50px;
+      left: 10px;
+      background-color: #283618;
+      padding: 15px;
+      border-radius: 8px;
+      color: white;
+      font-family: "Segoe UI", sans-serif;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+      width: 250px;
+      transition: max-height 0.3s ease;
+      overflow: hidden;
+      max-height: 600px; /* altura normal */
+    }
+    #panel-control.collapsed {
+      max-height: 80px; /* solo se ve logo/título/botón */
+    }
+
+    .boton-capa {
+      background-color: #606c38;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.3s;
+      font-weight: bold;
+    }
+    .boton-capa:hover { background-color: #3e536d; }
+    .boton-capa.activo {
+      background-color: #ffc300;
+      color: black;
+    }
+
+    /* Botón cerrar/abrir */
+    #toggle-panel {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: #606c38;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #toggle-panel:hover {
+      background: #ffc300;
+      color: black;
+    }
+    
+  </style>
+</head>
+<body>
+
+  <!-- Selector de fondo -->
+  <div id="selector-fondo">
+    <button onclick="document.getElementById('opciones-fondo').classList.toggle('visible')"
+      style="background-color:#2f3e4e; color:white; border:none; padding:8px 12px; border-radius:5px; cursor:pointer;">
+      Fondo
+    </button>
+    <div id="opciones-fondo">
+      <div onclick="cambiarFondo('osm')">OpenStreetMap</div>
+      <div onclick="cambiarFondo('positron')">Claro (CartoDB Positron)</div>
+      <div onclick="cambiarFondo('dark')">Oscuro (CartoDB DarkMatter)</div>
+      <div onclick="cambiarFondo('satellite')">Satélite (ESRI)</div>
+    </div>
+  </div>
+
+  <!-- Panel lateral -->
+  <div id="panel-control">
+    <button id="toggle-panel" onclick="togglePanel()">✖</button>
+    <img src="brandmark_white.png" alt="Logo" style="width: 180px; display: block; margin: 0 auto 10px auto;" />
+
+    <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px; text-align: center;">
+      Jaguar Rivers Initiative
+    </div>
+
+    <div id="btn-protegidas" class="boton-capa" onclick="seleccionarBoton(this, 'protegidas')">
+      CITIES
+    </div>
+
+    <div id="btn-municipios" class="boton-capa" onclick="seleccionarBoton(this, 'municipios')">
+      JAGUAR BASIN
+    </div>
+
+    <div id="btn-stepping" class="boton-capa" onclick="seleccionarBoton(this, 'stepping')">
+      STEPPING STONES
+    </div>
+
+    <div id="btn-arcas" class="boton-capa" onclick="seleccionarBoton(this, 'arcas')">
+      ARKS
+    </div>
+
+    <div id="btn-buffer" class="boton-capa" onclick="seleccionarBoton(this, 'Buffer')">
+      BUFFER AREA
+    </div>
+  </div>
+
+  <!-- Mapa -->
+  <div id="map"></div>
+
+  <script>
+    // Variables globales
+    var map = L.map("map", {
+      center: [-18.565631333393632, -60.060760172182256],
+      zoom: 7
+    });
+    L.control.scale().addTo(map);
+
+    var fondoActual = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+
+    var capas = { protegidas:null, municipios:null, corredor:null, stepping:null, arcas:null, subcorredores:null };
+    var seleccionado = null;
+
+    // Colores por capa
+    const coloresCapas = {
+      protegidas: "#588157",
+      municipios: "#90e0ef",
+      corredor:   "#0096c7",
+      stepping:   "#432818",
+      arcas: "#606c38",
+      Buffer: "#ca6702"
+    };
+
+    // Estilo resaltado al hacer click
+    function highlightStyle(color) {
+      return { color: '#000000', weight: 2, fillOpacity: 0.6, dashArray: '4' };
+    }
+
+    // Cambiar fondo
+    function cambiarFondo(opcion) {
+      if (fondoActual) map.removeLayer(fondoActual);
+      const fondos = {
+        osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
+        positron: L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'),
+        dark: L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png'),
+        satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}')
+      };
+      fondoActual = fondos[opcion] || fondos.osm;
+      fondoActual.addTo(map);
+    }
+
+    // Cargar y mostrar capas desde archivos externos
+    function cargarGeoJSON(nombre, archivo) {
+      fetch(archivo)
+        .then(res => res.json())
+        .then(data => { geojsonData[nombre] = data; })
+        .catch(err => console.error("Error cargando " + archivo, err));
+    }
+
+    var geojsonData = {};
+
+    // Carga de archivos externos
+    cargarGeoJSON('protegidas', 'datos_geojson/ciudades.geojson');
+    cargarGeoJSON('municipios', 'datos_geojson/JaguarBasin.geojson');
+    cargarGeoJSON('corredor',   'datos_geojson/corredor_jri.geojson');
+    cargarGeoJSON('stepping',   'datos_geojson/STEPPING_STONE.geojson');
+    cargarGeoJSON('arcas',   'datos_geojson/AREA.geojson');
+    cargarGeoJSON('Buffer',   'datos_geojson/BUFFER_AREA.geojson');
+
+    // Mostrar/Ocultar capas
+    function mostrarCapa(nombre) {
+      if (!geojsonData[nombre]) return;
+
+      if (capas[nombre]) {
+        map.removeLayer(capas[nombre]);
+        capas[nombre] = null;
+        return;
+      }
+      // Click en el mapa (fuera de un feature)
+      map.on('click', function () {
+        if (seleccionado) {
+          seleccionado.setStyle({
+            color: coloresCapas[nombre] || "gray",
+            weight: 1,
+            fillOpacity: 0.4
+          });
+          seleccionado.closePopup();
+          seleccionado = null;
+        }
+      });
+
+      capas[nombre] = L.geoJson(geojsonData[nombre], {
+        style: function(feature) {
+          return {
+            color: coloresCapas[nombre] || "gray",
+            weight: 1,
+            fillOpacity: 0.4
+          };
+        },
+        onEachFeature: function (feature, layer) {
+          let popupContent = "";
+
+          if (feature.properties?.Nombre) {
+            popupContent += "<strong>" + feature.properties.Nombre + "</strong><br>";
+          }
+
+          if (feature.properties?.descripcion) {
+            popupContent += feature.properties.descripcion;
+          }
+
+          // Asignamos el popup al layer
+          layer.bindPopup(
+            "<div style='padding:5px; font-size:14px; font-family:Segoe UI'>" +
+              popupContent +
+            "</div>"
+          );
+
+          layer.on('click', function (e) {
+            // Si ya está seleccionado este mismo → deseleccionamos y cerramos popup
+            if (seleccionado === layer) {
+              layer.setStyle({
+                color: coloresCapas[nombre] || "gray",
+                weight: 1,
+                fillOpacity: 0.4
+              });
+              seleccionado = null;
+              layer.closePopup(); // 🔴 evita que se muestre el texto de nuevo
+              return;
+            }
+
+            // Si hay otro seleccionado → devolverle estilo original
+            if (seleccionado) {
+              seleccionado.setStyle({
+                color: coloresCapas[nombre] || "gray",
+                weight: 1,
+                fillOpacity: 0.4
+              });
+              seleccionado.closePopup(); // cerramos su popup también
+            }
+
+            // Resaltar el actual y abrir popup
+            layer.setStyle(highlightStyle(coloresCapas[nombre]));
+            seleccionado = layer;
+            layer.openPopup(e.latlng); // aseguras apertura solo al seleccionar
+          });
+        }
+
+      }).addTo(map);
+    }
+
+    // Toggle visual y capa
+    function seleccionarBoton(elemento, capa) {
+      elemento.classList.toggle('activo');
+      mostrarCapa(capa);
+    }
+
+    // Toggle panel
+    function togglePanel() {
+      const panel = document.getElementById("panel-control");
+      const btn = document.getElementById("toggle-panel");
+
+      panel.classList.toggle("collapsed");
+
+      if (panel.classList.contains("collapsed")) {
+        btn.innerHTML = "☰";
+      } else {
+        btn.innerHTML = "✖";
+      }
+    }
+  </script>
+
+</body>
+</html>
