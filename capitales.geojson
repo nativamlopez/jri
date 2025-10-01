@@ -1,0 +1,25 @@
+{
+"type": "FeatureCollection",
+"name": "capitales",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "Nombre": "Roboré", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": "Capital municipal" }, "geometry": { "type": "Point", "coordinates": [ -59.753107022308967, -18.331420264430299 ] } },
+{ "type": "Feature", "properties": { "Nombre": "San José de Chiquitos", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": "Capital municipal" }, "geometry": { "type": "Point", "coordinates": [ -60.741215067999974, -17.845450578999849 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Carmen Rivero Tórrez", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": "Capital municipal" }, "geometry": { "type": "Point", "coordinates": [ -58.623996859972401, -18.828262581982596 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Puerto Suárez", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": "Capital municipal" }, "geometry": { "type": "Point", "coordinates": [ -57.797625071886507, -18.964559481929776 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Puerto Quijarro", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": "Capital municipal" }, "geometry": { "type": "Point", "coordinates": [ -57.716280817868004, -19.005686679920455 ] } },
+{ "type": "Feature", "properties": { "Nombre": "San Matías", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": "Capital municipal" }, "geometry": { "type": "Point", "coordinates": [ -58.401065542068885, -16.361482431973588 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Charagua", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": null }, "geometry": { "type": "Point", "coordinates": [ -63.200444693999948, -19.79199339599996 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Yacuiba", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": null }, "geometry": { "type": "Point", "coordinates": [ -63.679529978968134, -22.020092292843316 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Villa Montes", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": null }, "geometry": { "type": "Point", "coordinates": [ -63.471584669938501, -21.264326812544308 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Macharetí", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": null }, "geometry": { "type": "Point", "coordinates": [ -63.361140372765966, -20.815512130375243 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Boyuibe", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": null }, "geometry": { "type": "Point", "coordinates": [ -63.281265206335597, -20.42993795448448 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Camiri", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": null }, "geometry": { "type": "Point", "coordinates": [ -63.520297898523552, -20.039297634270504 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Huacareta", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": null }, "geometry": { "type": "Point", "coordinates": [ -64.003925846720605, -20.367047321483472 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Caraparí", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": null }, "geometry": { "type": "Point", "coordinates": [ -63.745824779545281, -21.825644718674258 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Entre Ríos", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": null }, "geometry": { "type": "Point", "coordinates": [ -64.172994188272085, -21.521098027898606 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Bermejo", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": null }, "geometry": { "type": "Point", "coordinates": [ -64.338117252759048, -22.73175630800873 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Tarija", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": null }, "geometry": { "type": "Point", "coordinates": [ -64.732695171058381, -21.537902647679076 ] } },
+{ "type": "Feature", "properties": { "Nombre": "Santa Cruz de la Sierra", "LS": null, "LW": null, "X": 0.0, "Y": 0.0, "Altura": 0.0, "Categoria": null }, "geometry": { "type": "Point", "coordinates": [ -63.181780428088452, -17.784671210251258 ] } }
+]
+}
